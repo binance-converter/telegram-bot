@@ -31,13 +31,19 @@ const (
 	notAvailableCommandMassage = "Sorry now this command not available"
 )
 
-type authService interface {
+type AuthService interface {
 	SignUp(ctx context.Context, userData core.ServiceSignUpUser) error
 }
 
 type BotHandler struct {
 	usersState  usersStateStorage
-	authService authService
+	authService AuthService
+}
+
+func NewBotHandler(authService AuthService) *BotHandler {
+	newBotHandler := BotHandler{authService: authService}
+	newBotHandler.usersState = make(usersStateStorage)
+	return &newBotHandler
 }
 
 func (b *BotHandler) CmdHandler(ctx context.Context,
