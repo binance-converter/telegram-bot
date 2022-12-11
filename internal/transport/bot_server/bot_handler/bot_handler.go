@@ -29,8 +29,13 @@ const (
 	invalidCommandMassage = ""
 )
 
+type authService interface {
+	SignUp(ctx context.Context, userData core.ServiceSignUpUser) error
+}
+
 type BotHandler struct {
-	usersState usersStateStorage
+	usersState  usersStateStorage
+	authService authService
 }
 
 func (b *BotHandler) CmdHandler(ctx context.Context,
