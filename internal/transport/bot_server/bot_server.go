@@ -9,11 +9,15 @@ import (
 
 type ConverterBot struct {
 	bot     *tgbotapi.BotAPI
-	handler bot_handler.BotHandler
+	handler *bot_handler.BotHandler
 }
 
-func NewConverterBot(bot *tgbotapi.BotAPI) *ConverterBot {
-	return &ConverterBot{bot: bot}
+func NewConverterBot(bot *tgbotapi.BotAPI, authService bot_handler.AuthService) *ConverterBot {
+	newConverterBot := ConverterBot{bot: bot}
+
+	newConverterBot.handler = bot_handler.NewBotHandler(authService)
+
+	return &newConverterBot
 }
 
 func (c *ConverterBot) Start(ctx context.Context) error {
@@ -70,6 +74,12 @@ func (c *ConverterBot) msgHandler(ctx context.Context, update tgbotapi.Update) {
 	}
 
 	if massage != nil {
-		c.bot.Send(*massage)
+		_, err := c.bot.Send(*massage)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error":   err.Error(),
+				"Message": massage,
+			}).Error("error send massage")
+		}
 	}
 }
