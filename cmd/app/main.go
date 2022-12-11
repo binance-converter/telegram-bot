@@ -2,16 +2,21 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"github.com/binance-converter/telegram-bot/internal/service"
 	"github.com/binance-converter/telegram-bot/internal/transport/bot_server"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/golobby/config/v3"
 	"github.com/golobby/config/v3/pkg/feeder"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log"
 )
 
 type appConfig struct {
 	Grpc struct {
+		Host *string
 		Port *int
 	}
 	Bot struct {
@@ -32,11 +37,30 @@ func main() {
 	}
 	bot.Debug = true
 
-	botServer := bot_server.NewConverterBot(bot)
+	grpcTarget := fmt.Sprintf("%s:%d", *cfg.Grpc.Host, *cfg.Grpc.Port)
+
+	conn, err := grpc.Dial(grpcTarget, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"grpc_target": grpcTarget,
+		}).Fatal("error create grpc connection")
+	} else {
+		logrus.WithFields(logrus.Fields{
+			"grpc_target": grpcTarget,
+		}).Info("grpc connection created")
+	}
+
+	authService := service.NewAuth(conn)
+
+	botServer := bot_server.NewConverterBot(bot, authService)
 
 	ctx := context.Background()
 
-	botServer.Start(ctx)
+	if err := botServer.Start(ctx); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("error start bot server")
+	}
 }
 
 func setupLogs() {
