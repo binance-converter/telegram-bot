@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
+	"github.com/binance-converter/telegram-bot/internal/transport/bot_server"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/golobby/config/v3"
 	"github.com/golobby/config/v3/pkg/feeder"
 	"github.com/sirupsen/logrus"
+	"log"
 )
 
 type appConfig struct {
@@ -17,10 +21,22 @@ type appConfig struct {
 
 func main() {
 	setupLogs()
-	_, err := initConfig()
+	cfg, err := initConfig()
 	if err != nil {
 		logrus.Fatal(err)
 	}
+
+	bot, err := tgbotapi.NewBotAPI(cfg.Bot.Token)
+	if err != nil {
+		log.Panic(err)
+	}
+	bot.Debug = true
+
+	botServer := bot_server.NewConverterBot(bot)
+
+	ctx := context.Background()
+
+	botServer.Start(ctx)
 }
 
 func setupLogs() {
