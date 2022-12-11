@@ -2,6 +2,7 @@ package bot_handler
 
 import (
 	"context"
+	"github.com/binance-converter/telegram-bot/core"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/openlyinc/pointy"
 )
@@ -26,7 +27,8 @@ const (
 		"Now you can give current exchange by command:\n" + commandGetCurrentExchange + "\n" +
 		"Enjoy!"
 
-	invalidCommandMassage = ""
+	invalidCommandMassage      = "Unknown command"
+	notAvailableCommandMassage = "Sorry now this command not available"
 )
 
 type authService interface {
@@ -60,6 +62,8 @@ func (b *BotHandler) CmdHandler(ctx context.Context,
 	case commandGetCurrentExchange:
 		msg, err = b.cmdGetCurrentExchange(ctx, update, nil)
 		break
+	default:
+		msg, err = b.invalidCommandMassage(update.Message.Chat.ID)
 	}
 
 	return msg, err
@@ -78,5 +82,11 @@ func (b *BotHandler) AnswerHandler(ctx context.Context, update tgbotapi.Update) 
 
 func (b *BotHandler) invalidCommandMassage(chatId int64) (msg *tgbotapi.MessageConfig, err error) {
 	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, invalidCommandMassage))
+	return msg, nil
+}
+
+func (b *BotHandler) notAvailableCommandMassage(chatId int64) (msg *tgbotapi.MessageConfig,
+	err error) {
+	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, notAvailableCommandMassage))
 	return msg, nil
 }

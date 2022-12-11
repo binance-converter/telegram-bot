@@ -6,8 +6,6 @@ import (
 )
 
 func (b *BotHandler) cmdAddCurrency(ctx context.Context, update tgbotapi.Update,
-	currentState *userState) (msg *tgbotapi.
-	MessageConfig,
-	err error) {
-	return msg, err
+	currentState *userState) (msg *tgbotapi.MessageConfig, err error) {
+	return b.notAvailableCommandMassage(update.Message.Chat.ID)
 }

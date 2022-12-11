@@ -8,5 +8,6 @@ import (
 func (b *BotHandler) cmdAddConverterWay(ctx context.Context, update tgbotapi.Update,
 	currentState *userState) (msg *tgbotapi.MessageConfig,
 	err error) {
-	return msg, err
+
+	return b.notAvailableCommandMassage(update.Message.Chat.ID)
 }
