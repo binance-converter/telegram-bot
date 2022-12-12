@@ -9,6 +9,9 @@ import (
 func (b *BotHandler) cmdStart(ctx context.Context, update tgbotapi.Update,
 	currentState *userState) (msg *tgbotapi.MessageConfig, err error) {
 
+	if update.Message == nil {
+		return nil, core.ErrorAuthServiceEmptyInputArg
+	}
 	signUpData := core.ServiceSignUpUser{
 		ChatId:       update.Message.Chat.ID,
 		UserName:     update.Message.From.UserName,
