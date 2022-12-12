@@ -86,7 +86,8 @@ func (b *BotHandler) cmdAddCurrencyWaitCurrencyType(ctx context.Context, update 
 
 	chooseCurrencyType := generateInlineKeyboardWithCancel(currencyCodes)
 
-	msg = pointy.Pointer(tgbotapi.NewMessage(update.Message.Chat.ID, "Choose currency code"))
+	msg = pointy.Pointer(tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID,
+		"Choose currency code"))
 	msg.ReplyMarkup = chooseCurrencyType
 	currentState.setCurrentState(cmdAddCurrencyStateWaitCurrencyCode)
 
@@ -123,7 +124,8 @@ func (b *BotHandler) cmdAddCurrencyWaitCurrencyCode(ctx context.Context, update 
 	}
 
 	chooseBank := generateInlineKeyboardWithCancel(banks)
-	msg = pointy.Pointer(tgbotapi.NewMessage(update.Message.Chat.ID, "Choose currency code"))
+	msg = pointy.Pointer(tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID,
+		"Choose currency code"))
 	msg.ReplyMarkup = chooseBank
 	currentState.setCurrentState(cmdAddCurrencyStateWaitBankCode)
 	return msg, nil

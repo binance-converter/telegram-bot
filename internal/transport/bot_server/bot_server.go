@@ -90,9 +90,9 @@ func (c *ConverterBot) msgHandler(ctx context.Context, update tgbotapi.Update) {
 func (c *ConverterBot) callbackQueryHandler(ctx context.Context, update tgbotapi.Update) {
 	logrus.WithFields(logrus.Fields{
 		"update_id": update.UpdateID,
-		"chat_id":   update.Message.Chat.ID,
-		"username":  update.Message.Chat.UserName,
-		"text":      update.Message.Text,
+		"chat_id":   update.CallbackQuery.Message.Chat.ID,
+		"username":  update.CallbackQuery.Message.Chat.UserName,
+		"data":      update.CallbackQuery.Data,
 	}).Info("receive massage")
 
 	var massage *tgbotapi.MessageConfig
