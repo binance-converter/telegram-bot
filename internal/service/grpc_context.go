@@ -11,7 +11,7 @@ const (
 )
 
 func addChatIdToContext(ctx context.Context, chatId int64) context.Context {
-	return metadata.NewIncomingContext(ctx, metadata.New(map[string]string{
+	return metadata.NewOutgoingContext(ctx, metadata.New(map[string]string{
 		chatIdKey: strconv.FormatInt(chatId, 10),
 	}))
 }
