@@ -39,6 +39,8 @@ func (c *ConverterBot) updateHandler(ctx context.Context, updates tgbotapi.Updat
 	for update := range updates {
 		if update.Message != nil { // If we got a message
 			c.msgHandler(ctx, update)
+		} else if update.CallbackQuery != nil {
+			c.callbackQueryHandler(ctx, update)
 		}
 	}
 }
@@ -71,6 +73,36 @@ func (c *ConverterBot) msgHandler(ctx context.Context, update tgbotapi.Update) {
 				"update_id": update.UpdateID,
 			}).Error("Error handle answer")
 		}
+	}
+
+	if massage != nil {
+		_, err := c.bot.Send(*massage)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error":   err.Error(),
+				"Message": massage,
+			}).Error("error send massage")
+		}
+	}
+}
+
+func (c *ConverterBot) callbackQueryHandler(ctx context.Context, update tgbotapi.Update) {
+	logrus.WithFields(logrus.Fields{
+		"update_id": update.UpdateID,
+		"chat_id":   update.Message.Chat.ID,
+		"username":  update.Message.Chat.UserName,
+		"text":      update.Message.Text,
+	}).Info("receive massage")
+
+	var massage *tgbotapi.MessageConfig
+
+	var err error
+	massage, err = c.handler.QueryHandler(ctx, update)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error":     err.Error(),
+			"update_id": update.UpdateID,
+		}).Error("Error handle query")
 	}
 
 	if massage != nil {
