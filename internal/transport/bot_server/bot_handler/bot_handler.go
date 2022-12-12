@@ -2,6 +2,7 @@ package bot_handler
 
 import (
 	"context"
+	"errors"
 	"github.com/binance-converter/telegram-bot/core"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/openlyinc/pointy"
@@ -29,6 +30,9 @@ const (
 
 	invalidCommandMassage      = "Unknown command"
 	notAvailableCommandMassage = "Sorry now this command not available"
+	internalErrorMassage       = "Sorry, an internal error has occurred"
+	CanceledMassage            = "Command canceled"
+	SuccessMassage             = "Success"
 )
 
 type AuthService interface {
@@ -98,6 +102,21 @@ func (b *BotHandler) AnswerHandler(ctx context.Context, update tgbotapi.Update) 
 	return currentState.commandHandler(ctx, update, currentState)
 }
 
+func (b *BotHandler) QueryHandler(ctx context.Context, update tgbotapi.Update) (msg *tgbotapi.
+	MessageConfig,
+	err error) {
+	currentState := b.getUserState(update.CallbackQuery.Message.Chat.ID)
+	if currentState == nil {
+		return b.invalidCommandMassage(update.CallbackQuery.Message.Chat.ID)
+	}
+
+	if update.CallbackQuery.Data == cancelButton {
+		return b.CanceledMassage(update.CallbackQuery.Message.Chat.ID)
+	}
+
+	return currentState.commandHandler(ctx, update, currentState)
+}
+
 func (b *BotHandler) invalidCommandMassage(chatId int64) (msg *tgbotapi.MessageConfig, err error) {
 	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, invalidCommandMassage))
 	return msg, nil
@@ -106,5 +125,23 @@ func (b *BotHandler) invalidCommandMassage(chatId int64) (msg *tgbotapi.MessageC
 func (b *BotHandler) notAvailableCommandMassage(chatId int64) (msg *tgbotapi.MessageConfig,
 	err error) {
 	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, notAvailableCommandMassage))
+	return msg, nil
+}
+
+func (b *BotHandler) internalErrorMassage(chatId int64) (msg *tgbotapi.MessageConfig,
+	err error) {
+	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, internalErrorMassage))
+	return msg, errors.New("internal error")
+}
+
+func (b *BotHandler) CanceledMassage(chatId int64) (msg *tgbotapi.MessageConfig,
+	err error) {
+	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, CanceledMassage))
+	return msg, nil
+}
+
+func (b *BotHandler) SuccessMassage(chatId int64) (msg *tgbotapi.MessageConfig,
+	err error) {
+	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, SuccessMassage))
 	return msg, nil
 }
