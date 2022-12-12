@@ -12,8 +12,21 @@ type commandHandler func(context.Context, tgbotapi.Update,
 
 type userState struct {
 	commandHandler commandHandler
-	currentState   string
+	currentState   int
 	timeout        time.Time
+	commandData    interface{}
+}
+
+func (u *userState) setHandler(commandHandler commandHandler) {
+	u.commandHandler = commandHandler
+}
+
+func (u *userState) setCurrentState(currentState int) {
+	u.currentState = currentState
+}
+
+func (u *userState) setTimeout(timeout time.Time) {
+	u.timeout = timeout
 }
 
 type usersStateStorage map[int64]*userState
@@ -27,4 +40,8 @@ func (b *BotHandler) getUserState(chatId int64) *userState {
 		return userState
 	}
 	return nil
+}
+
+func (b *BotHandler) removeUsersState(chatId int64) {
+	delete(b.usersState, chatId)
 }
