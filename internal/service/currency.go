@@ -124,12 +124,14 @@ func convertProtoCurrencyCodesToCore(protoCurrencyCodes *currencies.CurrencyCode
 
 func convertCoreCurrencyCodeToProto(coreCurrencyCode core.CurrencyCode) (
 	currencyCode *currencies.CurrencyCode) {
+	currencyCode = &currencies.CurrencyCode{}
 	currencyCode.CurrencyCode = string(coreCurrencyCode)
 	return currencyCode
 }
 
 func convertCoreCurrencyCodesToProto(coreCurrencies []core.CurrencyCode) (currencyCodes *currencies.
 	CurrencyCodes) {
+	currencyCodes = &currencies.CurrencyCodes{}
 	for _, currency := range coreCurrencies {
 		currencyCodes.CurrencyCodes = append(currencyCodes.CurrencyCodes,
 			convertCoreCurrencyCodeToProto(currency))
@@ -139,6 +141,7 @@ func convertCoreCurrencyCodesToProto(coreCurrencies []core.CurrencyCode) (curren
 
 func convertCoreCurrencyBankToProto(coreCurrencyBank core.CurrencyBank) (CurrencyBank *currencies.
 	BankName) {
+	CurrencyBank = &currencies.BankName{}
 	CurrencyBank.BankName = string(coreCurrencyBank)
 	return CurrencyBank
 }
@@ -170,6 +173,7 @@ func convertProtoCurrencyBanksToCore(protoCurrencyBank *currencies.
 
 func convertCoreCurrencyBanksToProto(coreCurrencyBanks []core.CurrencyBank) (
 	CurrencyBank *currencies.BankNames) {
+	CurrencyBank = &currencies.BankNames{}
 	for _, coreCurrencyBank := range coreCurrencyBanks {
 		bankName := convertCoreCurrencyBankToProto(coreCurrencyBank)
 		CurrencyBank.BankNames = append(CurrencyBank.BankNames,
@@ -220,14 +224,15 @@ func convertCoreFullCurrencyToProto(coreCurrency core.FullCurrency) (*currencies
 	}, nil
 }
 
-func convertCoreFullCurrenciesToProto(coreCurrencies []core.FullCurrency) (currencies *currencies.
+func convertCoreFullCurrenciesToProto(coreCurrencies []core.FullCurrency) (protoCurrencies *currencies.
 	FullCurrencies, err error) {
+	protoCurrencies = &currencies.FullCurrencies{}
 	for _, currency := range coreCurrencies {
 		protoCurrency, err := convertCoreFullCurrencyToProto(currency)
 		if err != nil {
 			return nil, err
 		}
-		currencies.FullCurrencies = append(currencies.FullCurrencies, protoCurrency)
+		protoCurrencies.FullCurrencies = append(protoCurrencies.FullCurrencies, protoCurrency)
 	}
-	return currencies, nil
+	return protoCurrencies, nil
 }
