@@ -112,6 +112,7 @@ func (b *BotHandler) cmdAddCurrencyWaitCurrencyCode(ctx context.Context, update 
 		err := b.currencyService.AddUserCurrency(ctx, update.CallbackQuery.Message.Chat.ID,
 			*currency)
 		if err != nil {
+			b.removeUsersState(update.CallbackQuery.Message.Chat.ID)
 			return b.internalErrorMassage(update.CallbackQuery.Message.Chat.ID)
 		}
 		b.removeUsersState(update.CallbackQuery.Message.Chat.ID)
@@ -120,6 +121,7 @@ func (b *BotHandler) cmdAddCurrencyWaitCurrencyCode(ctx context.Context, update 
 	banks, err := b.currencyService.GetAvailableBanks(ctx,
 		update.CallbackQuery.Message.Chat.ID, currency.CurrencyCode)
 	if err != nil {
+		b.removeUsersState(update.CallbackQuery.Message.Chat.ID)
 		return b.internalErrorMassage(update.CallbackQuery.Message.Chat.ID)
 	}
 
@@ -148,6 +150,7 @@ func (b *BotHandler) cmdAddCurrencyWaitWaitBankCode(ctx context.Context, update 
 	err = b.currencyService.AddUserCurrency(ctx, update.CallbackQuery.Message.Chat.ID,
 		*currency)
 	if err != nil {
+		b.removeUsersState(update.CallbackQuery.Message.Chat.ID)
 		return b.internalErrorMassage(update.CallbackQuery.Message.Chat.ID)
 	}
 	b.removeUsersState(update.CallbackQuery.Message.Chat.ID)

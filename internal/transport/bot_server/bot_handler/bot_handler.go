@@ -111,6 +111,7 @@ func (b *BotHandler) QueryHandler(ctx context.Context, update tgbotapi.Update) (
 	}
 
 	if update.CallbackQuery.Data == cancelButton {
+		b.removeUsersState(update.CallbackQuery.Message.Chat.ID)
 		return b.CanceledMassage(update.CallbackQuery.Message.Chat.ID)
 	}
 
