@@ -35,13 +35,25 @@ type AuthService interface {
 	SignUp(ctx context.Context, userData core.ServiceSignUpUser) error
 }
 
-type BotHandler struct {
-	usersState  usersStateStorage
-	authService AuthService
+type CurrencyService interface {
+	GetAvailableCurrencies(ctx context.Context, chatId int64,
+		currencyType core.CurrencyType) ([]core.CurrencyCode, error)
+	GetAvailableBanks(ctx context.Context, chatId int64,
+		currencyCode core.CurrencyCode) ([]core.CurrencyBank, error)
+	AddUserCurrency(ctx context.Context, chatId int64, currency core.FullCurrency) error
 }
 
-func NewBotHandler(authService AuthService) *BotHandler {
-	newBotHandler := BotHandler{authService: authService}
+type BotHandler struct {
+	usersState      usersStateStorage
+	authService     AuthService
+	currencyService CurrencyService
+}
+
+func NewBotHandler(authService AuthService, currencyService CurrencyService) *BotHandler {
+	newBotHandler := BotHandler{
+		authService:     authService,
+		currencyService: currencyService,
+	}
 	newBotHandler.usersState = make(usersStateStorage)
 	return &newBotHandler
 }
