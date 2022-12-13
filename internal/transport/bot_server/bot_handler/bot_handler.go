@@ -47,16 +47,24 @@ type CurrencyService interface {
 	AddUserCurrency(ctx context.Context, chatId int64, currency core.FullCurrency) error
 }
 
-type BotHandler struct {
-	usersState      usersStateStorage
-	authService     AuthService
-	currencyService CurrencyService
+type ConverterService interface {
+	GetAvailableConverterWay(ctx context.Context, chatId int64) ([]core.ConverterPair, error)
+	AddUserConverterWay(ctx context.Context, chatId int64, currency core.ConverterPair) error
 }
 
-func NewBotHandler(authService AuthService, currencyService CurrencyService) *BotHandler {
+type BotHandler struct {
+	usersState       usersStateStorage
+	authService      AuthService
+	currencyService  CurrencyService
+	converterService ConverterService
+}
+
+func NewBotHandler(authService AuthService, currencyService CurrencyService,
+	converterService ConverterService) *BotHandler {
 	newBotHandler := BotHandler{
-		authService:     authService,
-		currencyService: currencyService,
+		authService:      authService,
+		currencyService:  currencyService,
+		converterService: converterService,
 	}
 	newBotHandler.usersState = make(usersStateStorage)
 	return &newBotHandler
