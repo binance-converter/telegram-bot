@@ -13,10 +13,12 @@ type ConverterBot struct {
 }
 
 func NewConverterBot(bot *tgbotapi.BotAPI, authService bot_handler.AuthService,
-	currencyService bot_handler.CurrencyService) *ConverterBot {
+	currencyService bot_handler.CurrencyService,
+	converterService bot_handler.ConverterService) *ConverterBot {
 	newConverterBot := ConverterBot{bot: bot}
 
-	newConverterBot.handler = bot_handler.NewBotHandler(authService, currencyService)
+	newConverterBot.handler = bot_handler.NewBotHandler(authService, currencyService,
+		converterService)
 
 	return &newConverterBot
 }
