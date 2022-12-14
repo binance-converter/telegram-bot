@@ -49,7 +49,7 @@ type CurrencyService interface {
 
 type ConverterService interface {
 	GetAvailableConverterWay(ctx context.Context, chatId int64) ([]core.ConverterPair, error)
-	AddUserConverterWay(ctx context.Context, chatId int64, currency core.ConverterPair) error
+	AddUserConverterWay(ctx context.Context, chatId int64, converterPair core.ConverterPair) error
 }
 
 type BotHandler struct {
