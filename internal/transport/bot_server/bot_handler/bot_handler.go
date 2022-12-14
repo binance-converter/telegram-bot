@@ -50,6 +50,9 @@ type CurrencyService interface {
 type ConverterService interface {
 	GetAvailableConverterWay(ctx context.Context, chatId int64) ([]core.ConverterPair, error)
 	AddUserConverterWay(ctx context.Context, chatId int64, converterPair core.ConverterPair) error
+	GetMyConverterWay(ctx context.Context, chatId int64) ([]core.ConverterPair, error)
+	GetCurrentExchange(ctx context.Context, chatId int64, converterPair core.ConverterPair) (
+		core.Exchange, error)
 }
 
 type BotHandler struct {
