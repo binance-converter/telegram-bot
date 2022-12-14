@@ -24,8 +24,8 @@ func generateInlineKeyboardConverterWayWithCancel(converterWays []core.Converter
 			} else {
 				way = append(way, fmt.Sprintf("%s(%s)", currency.CurrencyCode, currency.BankCode))
 			}
-			converterWaysStr = append(converterWaysStr, strings.Join(way, converterWayStrStep))
 		}
+		converterWaysStr = append(converterWaysStr, strings.Join(way, converterWayStrStep))
 	}
 
 	return generateInlineKeyboardWithCancel(converterWaysStr)
