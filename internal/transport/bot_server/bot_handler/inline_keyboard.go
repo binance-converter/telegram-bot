@@ -11,11 +11,12 @@ const (
 
 func generateInlineKeyboardWithCancel[T string | core.CurrencyCode | core.CurrencyBank](buttons []T) tgbotapi.
 	InlineKeyboardMarkup {
-	var rows []tgbotapi.InlineKeyboardButton
+	var rows [][]tgbotapi.InlineKeyboardButton
 	buttons = append(buttons, cancelButton)
 	for _, button := range buttons {
-		rows = append(rows, tgbotapi.NewInlineKeyboardButtonData(string(button), string(button)))
+		rows = append(rows, tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData(
+			string(button), string(button))))
 	}
 
-	return tgbotapi.NewInlineKeyboardMarkup(rows)
+	return tgbotapi.NewInlineKeyboardMarkup(rows...)
 }
