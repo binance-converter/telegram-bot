@@ -52,8 +52,9 @@ func main() {
 
 	authService := service.NewAuth(conn)
 	currencyService := service.NewCurrency(conn)
+	converterService := service.NewConverter(conn)
 
-	botServer := bot_server.NewConverterBot(bot, authService, currencyService)
+	botServer := bot_server.NewConverterBot(bot, authService, currencyService, converterService)
 
 	ctx := context.Background()
 
