@@ -9,11 +9,18 @@ import (
 
 type ConverterBot struct {
 	bot     *tgbotapi.BotAPI
-	handler bot_handler.BotHandler
+	handler *bot_handler.BotHandler
 }
 
-func NewConverterBot(bot *tgbotapi.BotAPI) *ConverterBot {
-	return &ConverterBot{bot: bot}
+func NewConverterBot(bot *tgbotapi.BotAPI, authService bot_handler.AuthService,
+	currencyService bot_handler.CurrencyService,
+	converterService bot_handler.ConverterService) *ConverterBot {
+	newConverterBot := ConverterBot{bot: bot}
+
+	newConverterBot.handler = bot_handler.NewBotHandler(authService, currencyService,
+		converterService)
+
+	return &newConverterBot
 }
 
 func (c *ConverterBot) Start(ctx context.Context) error {
@@ -35,6 +42,8 @@ func (c *ConverterBot) updateHandler(ctx context.Context, updates tgbotapi.Updat
 	for update := range updates {
 		if update.Message != nil { // If we got a message
 			c.msgHandler(ctx, update)
+		} else if update.CallbackQuery != nil {
+			c.callbackQueryHandler(ctx, update)
 		}
 	}
 }
@@ -70,6 +79,42 @@ func (c *ConverterBot) msgHandler(ctx context.Context, update tgbotapi.Update) {
 	}
 
 	if massage != nil {
-		c.bot.Send(*massage)
+		_, err := c.bot.Send(*massage)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error":   err.Error(),
+				"Message": massage,
+			}).Error("error send massage")
+		}
+	}
+}
+
+func (c *ConverterBot) callbackQueryHandler(ctx context.Context, update tgbotapi.Update) {
+	logrus.WithFields(logrus.Fields{
+		"update_id": update.UpdateID,
+		"chat_id":   update.CallbackQuery.Message.Chat.ID,
+		"username":  update.CallbackQuery.Message.Chat.UserName,
+		"data":      update.CallbackQuery.Data,
+	}).Info("receive massage")
+
+	var massage *tgbotapi.MessageConfig
+
+	var err error
+	massage, err = c.handler.QueryHandler(ctx, update)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"error":     err.Error(),
+			"update_id": update.UpdateID,
+		}).Error("Error handle query")
+	}
+
+	if massage != nil {
+		_, err := c.bot.Send(*massage)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"error":   err.Error(),
+				"Message": massage,
+			}).Error("error send massage")
+		}
 	}
 }

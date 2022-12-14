@@ -2,6 +2,8 @@ package bot_handler
 
 import (
 	"context"
+	"errors"
+	"github.com/binance-converter/telegram-bot/core"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/openlyinc/pointy"
 )
@@ -26,11 +28,49 @@ const (
 		"Now you can give current exchange by command:\n" + commandGetCurrentExchange + "\n" +
 		"Enjoy!"
 
-	invalidCommandMassage = ""
+	invalidCommandMassage      = "Unknown command"
+	notAvailableCommandMassage = "Sorry now this command not available"
+	internalErrorMassage       = "Sorry, an internal error has occurred"
+	CanceledMassage            = "Command canceled"
+	SuccessMassage             = "Success"
 )
 
+type AuthService interface {
+	SignUp(ctx context.Context, userData core.ServiceSignUpUser) error
+}
+
+type CurrencyService interface {
+	GetAvailableCurrencies(ctx context.Context, chatId int64,
+		currencyType core.CurrencyType) ([]core.CurrencyCode, error)
+	GetAvailableBanks(ctx context.Context, chatId int64,
+		currencyCode core.CurrencyCode) ([]core.CurrencyBank, error)
+	AddUserCurrency(ctx context.Context, chatId int64, currency core.FullCurrency) error
+}
+
+type ConverterService interface {
+	GetAvailableConverterWay(ctx context.Context, chatId int64) ([]core.ConverterPair, error)
+	AddUserConverterWay(ctx context.Context, chatId int64, converterPair core.ConverterPair) error
+	GetMyConverterWay(ctx context.Context, chatId int64) ([]core.ConverterPair, error)
+	GetCurrentExchange(ctx context.Context, chatId int64, converterPair core.ConverterPair) (
+		core.Exchange, error)
+}
+
 type BotHandler struct {
-	usersState usersStateStorage
+	usersState       usersStateStorage
+	authService      AuthService
+	currencyService  CurrencyService
+	converterService ConverterService
+}
+
+func NewBotHandler(authService AuthService, currencyService CurrencyService,
+	converterService ConverterService) *BotHandler {
+	newBotHandler := BotHandler{
+		authService:      authService,
+		currencyService:  currencyService,
+		converterService: converterService,
+	}
+	newBotHandler.usersState = make(usersStateStorage)
+	return &newBotHandler
 }
 
 func (b *BotHandler) CmdHandler(ctx context.Context,
@@ -55,6 +95,8 @@ func (b *BotHandler) CmdHandler(ctx context.Context,
 	case commandGetCurrentExchange:
 		msg, err = b.cmdGetCurrentExchange(ctx, update, nil)
 		break
+	default:
+		msg, err = b.invalidCommandMassage(update.Message.Chat.ID)
 	}
 
 	return msg, err
@@ -71,7 +113,47 @@ func (b *BotHandler) AnswerHandler(ctx context.Context, update tgbotapi.Update) 
 	return currentState.commandHandler(ctx, update, currentState)
 }
 
+func (b *BotHandler) QueryHandler(ctx context.Context, update tgbotapi.Update) (msg *tgbotapi.
+	MessageConfig,
+	err error) {
+	currentState := b.getUserState(update.CallbackQuery.Message.Chat.ID)
+	if currentState == nil {
+		return b.invalidCommandMassage(update.CallbackQuery.Message.Chat.ID)
+	}
+
+	if update.CallbackQuery.Data == cancelButton {
+		b.removeUsersState(update.CallbackQuery.Message.Chat.ID)
+		return b.CanceledMassage(update.CallbackQuery.Message.Chat.ID)
+	}
+
+	return currentState.commandHandler(ctx, update, currentState)
+}
+
 func (b *BotHandler) invalidCommandMassage(chatId int64) (msg *tgbotapi.MessageConfig, err error) {
 	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, invalidCommandMassage))
+	return msg, nil
+}
+
+func (b *BotHandler) notAvailableCommandMassage(chatId int64) (msg *tgbotapi.MessageConfig,
+	err error) {
+	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, notAvailableCommandMassage))
+	return msg, nil
+}
+
+func (b *BotHandler) internalErrorMassage(chatId int64) (msg *tgbotapi.MessageConfig,
+	err error) {
+	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, internalErrorMassage))
+	return msg, errors.New("internal error")
+}
+
+func (b *BotHandler) CanceledMassage(chatId int64) (msg *tgbotapi.MessageConfig,
+	err error) {
+	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, CanceledMassage))
+	return msg, nil
+}
+
+func (b *BotHandler) SuccessMassage(chatId int64) (msg *tgbotapi.MessageConfig,
+	err error) {
+	msg = pointy.Pointer(tgbotapi.NewMessage(chatId, SuccessMassage))
 	return msg, nil
 }
