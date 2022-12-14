@@ -22,7 +22,6 @@ func (c *Converter) GetAvailableConverterWay(ctx context.Context,
 	chatId int64) ([]core.ConverterPair, error) {
 
 	ctxWithChatId := addChatIdToContext(ctx, chatId)
-
 	protoConverterPairs, err := c.converterServer.GetAvailableConverterPairs(ctxWithChatId,
 		&emptypb.Empty{})
 	if err != nil {
@@ -45,6 +44,42 @@ func (c *Converter) AddUserConverterWay(ctx context.Context, chatId int64,
 	_, err = c.converterServer.SetConvertPair(ctxWithChatId, protoConverterPair)
 
 	return err
+}
+
+func (c *Converter) GetMyConverterWay(ctx context.Context, chatId int64) ([]core.ConverterPair,
+	error) {
+	ctxWithChatId := addChatIdToContext(ctx, chatId)
+	protoConverterPairs, err := c.converterServer.GetMyConvertPairs(ctxWithChatId,
+		&emptypb.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	converterPairs, err := convertProtoConverterPairsToCore(protoConverterPairs)
+	if err != nil {
+		return nil, err
+	}
+	return converterPairs, nil
+}
+
+func (c *Converter) GetCurrentExchange(ctx context.Context, chatId int64,
+	converterPair core.ConverterPair) (core.Exchange, error) {
+	ctxWithChatId := addChatIdToContext(ctx, chatId)
+
+	protoConverterPair, err := convertCoreConverterPairToProto(converterPair)
+	if err != nil {
+		return 0, err
+	}
+
+	protoExchange, err := c.converterServer.GetCurrentExchange(ctxWithChatId,
+		protoConverterPair)
+	if err != nil {
+		return 0, err
+	}
+	currentExchange, err := convertProtoExchangeToCore(protoExchange)
+	if err != nil {
+		return 0, err
+	}
+	return currentExchange, nil
 }
 
 // ------------------------------------------------------------------------------------------------
