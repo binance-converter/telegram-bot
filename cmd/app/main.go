@@ -16,8 +16,8 @@ import (
 
 type appConfig struct {
 	Grpc struct {
-		Host *string
-		Port *int
+		Host string `env:"GRPC_HOST"`
+		Port int    `env:"GRPC_PORT"`
 	}
 	Bot struct {
 		Token string `env:"BINANCE_CONVERTER_BOOT_TOKEN"`
@@ -28,7 +28,7 @@ func main() {
 	setupLogs()
 	cfg, err := initConfig()
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Warning(err)
 	}
 
 	bot, err := tgbotapi.NewBotAPI(cfg.Bot.Token)
@@ -37,7 +37,7 @@ func main() {
 	}
 	bot.Debug = true
 
-	grpcTarget := fmt.Sprintf("%s:%d", *cfg.Grpc.Host, *cfg.Grpc.Port)
+	grpcTarget := fmt.Sprintf("%s:%d", cfg.Grpc.Host, cfg.Grpc.Port)
 
 	conn, err := grpc.Dial(grpcTarget, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -77,11 +77,11 @@ func setupLogs() {
 func initConfig() (appConfig, error) {
 	var cfg appConfig
 
-	yamlFeeder := feeder.Yaml{Path: "config.yaml"}
 	envFeeder := feeder.Env{}
+	yamlFeeder := feeder.Yaml{Path: "config.yaml"}
 	dotEnvFeeder := feeder.DotEnv{Path: ".env"}
 
-	err := config.New().AddFeeder(yamlFeeder, envFeeder, dotEnvFeeder).AddStruct(&cfg).Feed()
+	err := config.New().AddFeeder(envFeeder, dotEnvFeeder, yamlFeeder).AddStruct(&cfg).Feed()
 
 	return cfg, err
 }
