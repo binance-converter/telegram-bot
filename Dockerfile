@@ -12,6 +12,8 @@ WORKDIR /binance-converter-telegram-bot
 # build go app
 RUN go mod download
 
+RUN go mod tidy
+
 RUN go build -o binance-converter-telegram-bot ./cmd/app/main.go
 
 FROM alpine:latest
