@@ -71,6 +71,7 @@ jobs:
             git checkout feature/setting-deploy-to-server
             export BINANCE_CONVERTER_BACKEND_GRPC_PORT=${{ vars.GRPC_PORT }}
             export BINANCE_CONVERTER_BOOT_TOKEN=${{ secrets.BOOT_TOKEN }}
+            echo bye | docker-compose down && echo Success. || echo Failure.
             docker-compose -f docker-compose.yaml -p binance-converter up -d --remove-orphans
             cd ../../
             rm -r binance-converter
