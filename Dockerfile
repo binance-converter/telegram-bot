@@ -23,5 +23,3 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 COPY --from=0 /binance-converter-telegram-bot/binance-converter-telegram-bot .
-
-CMD ["./binance-converter-telegram-bot"]

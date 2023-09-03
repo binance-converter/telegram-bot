@@ -2,9 +2,8 @@ version: '3.8'
 
 services:
   binance-converter-telegram-bot:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: emil11078/binance-converter-telegram-bot:latest
+    command: ./binance-converter-telegram-bot
     environment:
       - GRPC_HOST=backend
       - GRPC_PORT=$BINANCE_CONVERTER_BACKEND_GRPC_PORT
