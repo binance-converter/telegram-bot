@@ -9,7 +9,7 @@ on:
 jobs:
   run-tests:
     name: 'Run Tests'
-    runs-on: ubuntu-latest
+    runs-on: production
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -25,7 +25,7 @@ jobs:
 
   build-image:
     name: 'Build and push docker image'
-    runs-on: ubuntu-latest
+    runs-on: production
     needs:
       - run-tests
     steps:
@@ -49,11 +49,11 @@ jobs:
           push: true
           tags: emil11078/binance-converter-telegram-bot:latest
           platforms:
-            linux/arm/v7
+            linux/amd64
 
   deploy:
     name: 'Deploy to server'
-    runs-on: ubuntu-latest
+    runs-on: production
     needs:
       - build-image
     steps:
@@ -72,6 +72,7 @@ jobs:
             export BINANCE_CONVERTER_BACKEND_GRPC_PORT=${{ vars.GRPC_PORT }}
             export BINANCE_CONVERTER_BOOT_TOKEN=${{ secrets.BOOT_TOKEN }}
             echo bye | docker-compose down && echo Success. || echo Failure.
+            docker-compose pull
             docker-compose -f docker-compose.yaml -p binance-converter up -d --remove-orphans
             cd ../../
             rm -r binance-converter
