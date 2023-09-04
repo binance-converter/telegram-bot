@@ -5,7 +5,15 @@ services:
     image: emil11078/binance-converter-telegram-bot:latest
     command: ./binance-converter-telegram-bot
     restart: always
+    networks:
+      - db_main
     environment:
       - GRPC_HOST=binance-converter-backend
       - GRPC_PORT=$BINANCE_CONVERTER_BACKEND_GRPC_PORT
       - BINANCE_CONVERTER_BOOT_TOKEN=$BINANCE_CONVERTER_BOOT_TOKEN
+
+
+networks:
+  db_main:
+    name: db_main
+    external: true
